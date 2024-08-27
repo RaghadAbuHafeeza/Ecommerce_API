@@ -23,7 +23,7 @@ namespace Ecommerce.Services
         {
             this.configuration = configuration;
             this.userManager = userManager;
-            secretKey = configuration.GetSection("ApiSetting")["SecretKey"];
+            secretKey = configuration.GetSection("ApiSettings")["SecretKey"];
         }
 
 

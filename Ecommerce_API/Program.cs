@@ -42,7 +42,7 @@ namespace Ecommerce_API
 
             builder.Services.AddResponseCaching();
 
-            // Register repositories and services
+            // Register Repositories and Services
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
@@ -58,9 +58,10 @@ namespace Ecommerce_API
 
             var key = builder.Configuration.GetValue<string>("ApiSettings:SecretKey");
 
-            //builder.Services.AddScoped(typeof(UserManager<LocalUser>));
-            //builder.Services.AddScoped(typeof(RoleManager<IdentityRole>));
-            //builder.Services.AddScoped(typeof(SignInManager<IdentityRole>));
+            //builder.services.addscoped(typeof(usermanager<localuser>));
+            //builder.services.addscoped(typeof(rolemanager<identityrole>));
+            //builder.services.addscoped(typeof(signinmanager<identityrole>));
+
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -69,12 +70,12 @@ namespace Ecommerce_API
             {
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
+                    ValidateIssuerSigningKey = true,
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)),
                 };
             });
 
@@ -88,20 +89,19 @@ namespace Ecommerce_API
                 options.Password.RequiredUniqueChars = 0;
                 options.Password.RequireNonAlphanumeric = false;
             })
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-
-
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
 
             // Configure API Behavior
             builder.Services.Configure<ApiBehaviorOptions>(options =>
             {
                 options.InvalidModelStateResponseFactory = (actionContext) =>
                 {
-                    var errors = actionContext.ModelState.Where(x => x.Value?.Errors.Count() > 0)
-                                                             .SelectMany(x => x.Value.Errors)
-                                                             .Select(e => e.ErrorMessage)
-                                                             .ToList();
+                    var errors = actionContext.ModelState
+                          .Where(x => x.Value.Errors.Count > 0)
+                          .SelectMany(x => x.Value.Errors)
+                          .Select(e => e.ErrorMessage)
+                          .ToList();
                     var validationResponse = new ApiValidationResponse(statusCode: 400) { Errors = errors };
                     return new BadRequestObjectResult(validationResponse);
                 };
@@ -121,7 +121,7 @@ namespace Ecommerce_API
             }
 
             app.UseHttpsRedirection();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
 

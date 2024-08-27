@@ -23,7 +23,10 @@ namespace Ecommerce.Infrastructure.Repositories
         private readonly IMapper mapper;
         private readonly ITokenService tokenService;
 
-        public UsersRepository(AppDbContext dbContext, UserManager<LocalUser> userManager, RoleManager<IdentityRole> roleManager, SignInManager<LocalUser> signInManager, IMapper mapper, ITokenService tokenService)
+        public UsersRepository(AppDbContext dbContext, UserManager<LocalUser> userManager,
+                   RoleManager<IdentityRole> roleManager, IMapper mapper,
+                   SignInManager<LocalUser> signInManager,
+                   ITokenService tokenService)
         {
             this.dbContext = dbContext;
             this.userManager = userManager;
@@ -35,7 +38,7 @@ namespace Ecommerce.Infrastructure.Repositories
 
         public bool IsUniqueUser(string Email)
         {
-            var result = dbContext.LocalUser.FirstOrDefault(x => x.Email == Email);
+            var result = dbContext.LocalUser.FirstOrDefault(e => e.Email == Email);
             return result == null;
         }
 
@@ -43,22 +46,23 @@ namespace Ecommerce.Infrastructure.Repositories
         {
             var user = await userManager.FindByEmailAsync(loginRequestDTO.Email);
 
-            var checkPassword = await signInManager.CheckPasswordSignInAsync(user, loginRequestDTO.Password, false);
-
-            if (!checkPassword.Succeeded)
+            var checkPasssword = await signInManager.CheckPasswordSignInAsync(user, loginRequestDTO.Password, false);
+            if (!checkPasssword.Succeeded)
             {
                 return new LoginResponseDTO()
                 {
                     User = null,
-                    Token = " "
+                    Token = "",
+
                 };
             }
+
             var role = await userManager.GetRolesAsync(user);
             return new LoginResponseDTO()
             {
                 User = mapper.Map<LocalUserDTO>(user),
                 Token = await tokenService.CreateTokenAsync(user),
-                Role = role.FirstOrDefault()
+                Role = role.FirstOrDefault(),
             };
         }
 

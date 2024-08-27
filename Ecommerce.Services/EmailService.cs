@@ -28,7 +28,7 @@ namespace Ecommerce.Services
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = message };
 
             var client = new SmtpClient();
-            await client.ConnectAsync(configuration["EmailSettings:SmtServer"], int.Parse(configuration["EmailSettings:Port"])
+            await client.ConnectAsync(configuration["EmailSettings:SmtpServer"], int.Parse(configuration["EmailSettings:Port"])
                                , bool.Parse(configuration["EmailSettings:UseSSL"]));
 
             await client.AuthenticateAsync(configuration["EmailSettings:FromEmail"], configuration["EmailSettings:Password"]);

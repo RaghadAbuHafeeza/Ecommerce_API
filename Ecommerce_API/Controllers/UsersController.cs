@@ -3,6 +3,7 @@ using Ecommerce.Core.Entities.DTO;
 using Ecommerce.Core.IRepositories;
 using Ecommerce.Core.IRepositories.IServices;
 using Ecommerce.Infrastructure.Repositories;
+using Ecommerce.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -17,12 +18,13 @@ namespace Ecommerce.API.Controllers
         private readonly UserManager<LocalUser> userManager;
         private readonly IEmailService emailService;
 
-        public UsersController(IUsersRepository usersRepository , UserManager<LocalUser> userManager , IEmailService emailService)
+        public UsersController(IUsersRepository usersRepository, UserManager<LocalUser> userManager, IEmailService emailService)
         {
             this.usersRepository = usersRepository;
             this.userManager = userManager;
             this.emailService = emailService;
         }
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterationRequestDTO model)
@@ -42,7 +44,7 @@ namespace Ecommerce.API.Controllers
                 }
                 else
                 {
-                    return Ok(new ApiResponse(201, result: user));
+                    return Ok(new ApiResponse(200, result: user));
                 }
             }
             catch (Exception ex)
@@ -109,6 +111,14 @@ namespace Ecommerce.API.Controllers
                     return BadRequest(new ApiResponse(400, "Token inValid"));
                 }
 
+
+                var tokenValid = await userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "ResetPassword", model.Token);
+                if (!tokenValid)
+                {
+                    return BadRequest(new ApiResponse(400, "Invalid or expired token"));
+                }
+
+
                 var result = await userManager.ResetPasswordAsync(user, model.Token, model.newPassword);
                 if (result.Succeeded)
                 {
@@ -116,10 +126,12 @@ namespace Ecommerce.API.Controllers
                 }
                 else
                 {
-                    return BadRequest(new ApiResponse(400, "Error while Resetting"));
+                    var errors = result.Errors.Select(e => e.Description).ToList();
+                    return BadRequest(new ApiValidationResponse(errors, 400));
+                    // return BadRequest(new ApiResponse(400, "Error while Resetting"));
                 }
             }
-            return BadRequest(new ApiResponse(400, "Check Your Info"));
+            return BadRequest(new ApiResponse(400, "Invalid request data"));
         }
 
 

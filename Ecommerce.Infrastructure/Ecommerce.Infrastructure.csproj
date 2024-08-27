@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Ecommerce.Services\Ecommerce.Services.csproj" />
+    <ProjectReference Include="..\Ecommerce.Core\Ecommerce.Core.csproj" />
   </ItemGroup>
 
 </Project>
