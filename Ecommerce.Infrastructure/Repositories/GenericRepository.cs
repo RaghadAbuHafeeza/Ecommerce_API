@@ -45,7 +45,7 @@ namespace Ecommerce.Infrastructure.Repositories
             //if(typeof(T) == typeof(Products))
             //{
             //    var model = await dbContext.Products.Include(x => x.Category).ToListAsync();
-            //    return (IEnumerable<T>)model;
+            //    return (IEnumerable<T>)model;  
             //}
 
             //return await dbContext.Set<T>().ToListAsync();
