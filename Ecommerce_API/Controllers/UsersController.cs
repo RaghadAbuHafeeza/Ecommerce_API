@@ -81,7 +81,7 @@ namespace Ecommerce.API.Controllers
                 return BadRequest(new ApiValidationResponse(new List<string> { $"This Email {email} Not Found :(" }));
             }
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
-            var ForgetPasswordLink = Url.Action("", "", new { token = token, email = user.Email }, Request.Scheme);
+            var ForgetPasswordLink = Url.Action("ResetPassword", "Users", new { token = token, email = user.Email }, Request.Scheme);
             var subject = "Reset Password Request";
             var message = $"Please Click on the Link to Reset Your Password: {ForgetPasswordLink}";
 

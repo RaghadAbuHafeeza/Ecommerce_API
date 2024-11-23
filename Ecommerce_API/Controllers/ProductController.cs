@@ -119,7 +119,7 @@ namespace Ecommerce.API.Controllers
         }
 
 
-        [HttpGet("Product/{Cat_Id}")]
+        [HttpGet("{Cat_Id}")]
         public async Task<ActionResult<Products>> GetAllProductByCatId(int Cat_Id)
         {
             var products = await unitOfWork.productRepository.GetAllProductByCategoryId(Cat_Id);

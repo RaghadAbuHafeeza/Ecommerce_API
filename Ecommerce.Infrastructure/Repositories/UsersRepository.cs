@@ -16,11 +16,17 @@ namespace Ecommerce.Infrastructure.Repositories
 {
     public class UsersRepository : IUsersRepository
     {
+        // Injected AppDbContext for interacting with the database using Entity Framework Core.
         private readonly AppDbContext dbContext;
+        // UserManager is used to manage user-related operations like creating, deleting, and updating user information.
         private readonly UserManager<LocalUser> userManager;
+        // RoleManager is used to manage roles, such as creating, deleting, and assigning roles to users.
         private readonly RoleManager<IdentityRole> roleManager;
+        // SignInManager is used to handle user authentication, including sign-in and sign-out processes.
         private readonly SignInManager<LocalUser> signInManager;
+        // IMapper is used for mapping between entities and DTOs (Data Transfer Objects) to simplify data transformations.
         private readonly IMapper mapper;
+        // ITokenService is used to generate and manage authentication tokens, enabling secure user authentication and authorization.
         private readonly ITokenService tokenService;
 
         public UsersRepository(AppDbContext dbContext, UserManager<LocalUser> userManager,
@@ -46,7 +52,7 @@ namespace Ecommerce.Infrastructure.Repositories
         {
             var user = await userManager.FindByEmailAsync(loginRequestDTO.Email);
 
-            var checkPasssword = await signInManager.CheckPasswordSignInAsync(user, loginRequestDTO.Password, false);
+            var checkPasssword = await signInManager.CheckPasswordSignInAsync(user, loginRequestDTO.Password, false);// false => Validates the user's password without locking the account on failed attempts.
             if (!checkPasssword.Succeeded)
             {
                 return new LoginResponseDTO()
@@ -77,10 +83,12 @@ namespace Ecommerce.Infrastructure.Repositories
                 Address = registerationRequestDTO.Address
             };
 
-            using(var transaction = await dbContext.Database.BeginTransactionAsync())
+            // Ensures user creation and role assignment are completed together or rolled back if any step fails.
+            using (var transaction = await dbContext.Database.BeginTransactionAsync())
             {
                 try
                 {
+                    // Creates a new user with the specified password using the UserManager service.
                     var result = await userManager.CreateAsync(user, registerationRequestDTO.Password);
                     if (result.Succeeded)
                     {
@@ -91,14 +99,14 @@ namespace Ecommerce.Infrastructure.Repositories
                             throw new Exception($"The role {registerationRequestDTO.Role} doesn't exist. !");
                         }
 
-
+                        // Assigns the specified role to the newly created user.
                         var userRoleResult = await userManager.AddToRoleAsync(user, registerationRequestDTO.Role);
 
                         if (userRoleResult.Succeeded)
                         {
-                            await transaction.CommitAsync();
-                            var userReturn = dbContext.LocalUser.FirstOrDefault(u => u.Email == registerationRequestDTO.Email);
-                            return mapper.Map<LocalUserDTO>(userReturn);
+                            await transaction.CommitAsync(); // Finalize the transaction and save all changes permanently after successfully assigning the role.
+                            var userReturn = dbContext.LocalUser.FirstOrDefault(u => u.Email == registerationRequestDTO.Email); // Gets the newly created user from the database.
+                            return mapper.Map<LocalUserDTO>(userReturn); // Converts the user entity to a LocalUserDTO object using AutoMapper.
                         }
                         else
                         {

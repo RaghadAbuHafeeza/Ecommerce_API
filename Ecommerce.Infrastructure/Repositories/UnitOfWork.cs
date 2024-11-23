@@ -20,6 +20,9 @@ namespace Ecommerce.Infrastructure.Repositories
 
         public IProductRepository productRepository { get; set; }
 
+        // Task<int> ==> Asynchronously commits all changes to the database
+        //               (such as insert, update, or delete)
+        //               and returns the number of rows affected by those changes.
         public async Task<int> save()
            => await dbContext.SaveChangesAsync();
     }

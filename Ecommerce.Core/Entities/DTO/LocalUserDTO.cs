@@ -10,4 +10,6 @@ namespace Ecommerce.Core.Entities.DTO
     {
         public string UserName { get; set; }
     }
+    // LocalUserDTO is used to send only essential user data (e.g., UserName)
+    // through the API, ensuring security and reducing data transfer.
 }

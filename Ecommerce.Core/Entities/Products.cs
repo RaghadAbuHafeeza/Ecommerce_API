@@ -17,6 +17,7 @@ namespace Ecommerce.Core.Entities
 
         [ForeignKey(nameof(Category))]
         public int Category_Id { get; set; }
+        // 'virtual' enables Lazy Loading, loading related data (e.g., Category, OrderDetails) only when accessed.
         public virtual Categories? Category { get; set; }
 
         public virtual ICollection<OrderDetails>? OrderDetails { get; set; } = new HashSet<OrderDetails>();

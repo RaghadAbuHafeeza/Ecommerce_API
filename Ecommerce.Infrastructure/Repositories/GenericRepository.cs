@@ -52,6 +52,7 @@ namespace Ecommerce.Infrastructure.Repositories
 
 
             // Pagination:
+            // Retrieves all data from the database table associated with the type T (e.g., Product) and stores it in a queryable object for further operations.
             IQueryable<T> query = dbContext.Set<T>();
 
             if(filter != null)
